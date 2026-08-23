@@ -254,10 +254,57 @@ textarea { resize: vertical; line-height: 1.55; }
 .ce-ico { font-size: 2.6rem; opacity: .5; margin-bottom: .4rem; }
 .canvas-empty p { margin: 0; font-size: .9rem; }
 
+#map-canvas { cursor: grab; touch-action: none; }
+#map-canvas.grabbing { cursor: grabbing; }
+#map-canvas.pointing { cursor: pointer; }
+
 .map-toolbar {
   margin-top: .9rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
 }
 .toolbar-note { font-size: .82rem; color: var(--muted); }
+
+.zoom-group {
+  display: flex; align-items: center; gap: .15rem;
+  background: var(--bg-2); border: 1px solid var(--border-2);
+  border-radius: 999px; padding: .2rem;
+}
+.btn-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: none; background: transparent; color: var(--ink);
+  font-size: 1.15rem; font-weight: 700; line-height: 1;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-icon:hover { background: var(--panel-2); color: var(--accent); }
+.zoom-level {
+  font-size: .76rem; color: var(--muted); min-width: 44px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.btn-sm { padding: .35rem .8rem; font-size: .78rem; }
+
+.map-hint {
+  margin-top: .6rem; display: flex; flex-wrap: wrap; gap: .3rem .9rem;
+  font-size: .75rem; color: var(--dim);
+}
+.map-hint b { color: var(--muted); font-weight: 600; }
+
+.sel-chip {
+  margin-top: .7rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap;
+  background: rgba(251,146,60,.09);
+  border: 1px solid rgba(251,146,60,.35);
+  border-radius: 12px; padding: .6rem .9rem;
+}
+.sel-main { display: flex; align-items: center; gap: .7rem; }
+.sel-num {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--danger); color: #1a0e04;
+  font-size: .8rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.sel-main b { display: block; font-size: .9rem; }
+.sel-main i { display: block; font-style: normal; font-size: .75rem; color: var(--muted); }
 
 /* ---------------- prompt builder ---------------- */
 .pb-empty {

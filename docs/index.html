@@ -46,8 +46,8 @@
       </div>
       <div class="mp">
         <span class="mp-ico">🧊</span>
-        <div><b>มุมมอง 3 มิติ</b>
-          <p>สลับดูแผนที่แบบยกระดับ 3 มิติ เพื่อให้เห็นภาพรวมพื้นที่ชัดเจนขึ้น</p></div>
+        <div><b>แผนที่โต้ตอบได้ + มุมมอง 3 มิติ</b>
+          <p>ชี้ที่หมุดเพื่อดูชื่อและพิกัด คลิกเพื่อไฮไลต์พื้นที่ของหมู่บ้านนั้น ซูม เลื่อน และหมุนดูแบบ 3 มิติได้</p></div>
       </div>
     </div>
 
@@ -197,9 +197,32 @@
     </div>
 
     <div class="map-toolbar" id="map-toolbar" hidden>
+      <div class="zoom-group">
+        <button class="btn-icon" id="zoom-out-btn" title="ซูมออก">−</button>
+        <span class="zoom-level" id="zoom-level">100%</span>
+        <button class="btn-icon" id="zoom-in-btn" title="ซูมเข้า">+</button>
+      </div>
       <button class="btn-primary" id="download-png-btn">⬇ ดาวน์โหลดภาพ PNG</button>
       <button class="btn-ghost" id="reset-view-btn">รีเซ็ตมุมมอง</button>
       <span class="toolbar-note" id="village-count-label"></span>
+    </div>
+
+    <div class="map-hint" id="map-hint" hidden>
+      <span><b>ชี้</b> ที่หมุดเพื่อดูรายละเอียด</span>
+      <span><b>คลิก</b> เพื่อเลือกและไฮไลต์พื้นที่</span>
+      <span><b>ลาก</b> เพื่อเลื่อน · <b>สกรอลล์</b> เพื่อซูม</span>
+      <span id="hint-3d" hidden><b>โหมด 3 มิติ:</b> ลากเพื่อหมุน · Shift+ลาก เพื่อเลื่อน</span>
+    </div>
+
+    <div class="sel-chip" id="sel-chip" hidden>
+      <div class="sel-main">
+        <span class="sel-num" id="sel-num">1</span>
+        <div>
+          <b id="sel-name">—</b>
+          <i id="sel-coord">—</i>
+        </div>
+      </div>
+      <button class="btn-ghost btn-sm" id="sel-clear">ยกเลิกการเลือก</button>
     </div>
   </main>
 
