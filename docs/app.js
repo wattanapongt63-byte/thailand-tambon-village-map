@@ -196,7 +196,7 @@ function renderMap(t) {
   ctx.stroke();
   ctx.fillStyle = '#6b6a66';
   ctx.font = '400 11px Sarabun, sans-serif';
-  ctx.fillText('ที่มาข้อมูล: github.com/prasertcbs/thailand_gis (HDX COD-AB Thailand + TH_VILLAGE2012) — ใช้เพื่อการศึกษา ไม่ใช่เพื่อการค้า', PAD, footerY);
+  ctx.fillText('ที่มาข้อมูล: ขอบเขตตำบล — thailand_gis (HDX COD-AB) | หมู่บ้าน — กรมการปกครอง catalog.dopa.go.th (gis-01) — ใช้เพื่อการศึกษา', PAD, footerY);
   const now = new Date();
   ctx.fillText(`สร้างเมื่อ ${now.toLocaleDateString('th-TH')}`, PAD, footerY + 16);
 }

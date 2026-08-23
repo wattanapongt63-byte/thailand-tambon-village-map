@@ -1,68 +1,149 @@
 import os
-import re
 import json
 import glob
 import shapefile
 
 ROOT = os.path.expanduser("~/thailand-tambon-village-map")
-VILLAGE_SHP = os.path.join(ROOT, "data/raw/village/TH_VILLAGE2012.shp")
+DOPA_DIR = os.path.join(ROOT, "data/raw/dopa_village")
 TAMBON_DIR = os.path.join(ROOT, "data/raw/tambon_shp")
 OUT_TAMBON_DIR = os.path.join(ROOT, "data/processed/tambon")
 OUT_INDEX = os.path.join(ROOT, "data/processed/index.json")
 
 os.makedirs(OUT_TAMBON_DIR, exist_ok=True)
 
-AMP_PREFIX_RE = re.compile(r'^(กิ่ง\s*อ\.|กิ่งอำเภอ|อ\.)\s*')
-
 def norm(s):
     if s is None:
         return ''
     return s.strip()
 
-def norm_amp(prv_th, amp_th):
-    a = AMP_PREFIX_RE.sub('', norm(amp_th))
-    prefix = 'เมือง' + prv_th
-    if a == prefix:
-        return 'เมือง'
-    return a
-
-# Provinces whose villages are still filed under an older parent province
-# in the 2012 village dataset (administrative splits that happened after).
-PROVINCE_FALLBACK = {
-    'บึงกาฬ': 'หนองคาย',
-}
-
-print("Loading village points...")
-vsf = shapefile.Reader(VILLAGE_SHP)
+print("Loading DOPA village points...")
 village_index = {}
+# nested index for prefix-fallback matching: province -> amphoe -> tambon -> villages
+nested_index = {}
 total_villages = 0
-for shape_rec in vsf.iterShapeRecords():
-    rec = shape_rec.record.as_dict()
-    pts = shape_rec.shape.points
-    if not pts:
-        continue
-    lon, lat = pts[0]
-    prv = norm(rec.get('PRV_NAME'))
-    amp = norm_amp(prv, rec.get('AMP_NAME'))
-    tam = norm(rec.get('TAM_NAME'))
-    name = norm(rec.get('NAME'))
-    key = (prv, amp, tam)
-    village_index.setdefault(key, []).append({"name": name, "lon": lon, "lat": lat})
-    total_villages += 1
+for path in glob.glob(os.path.join(DOPA_DIR, "*.json")):
+    rows = json.load(open(path, encoding="utf-8"))
+    for r in rows:
+        try:
+            lat = float(r["oct_side15_lat"])
+            lon = float(r["oct_side15_lon"])
+        except (TypeError, ValueError):
+            continue
+        if not lat or not lon:
+            continue
+        prv = norm(r.get("pname"))
+        amp = norm(r.get("aname"))
+        tam = norm(r.get("tname"))
+        name = norm(r.get("mname"))
+        key = (prv, amp, tam)
+        village_index.setdefault(key, []).append({"name": name, "lon": lon, "lat": lat})
+        nested_index.setdefault(prv, {}).setdefault(amp, {}).setdefault(tam, [])
+        nested_index[prv][amp][tam].append({"name": name, "lon": lon, "lat": lat})
+        total_villages += 1
 
 print(f"Loaded {total_villages} village points, {len(village_index)} tambon keys")
 
-def lookup_villages(prv_th, amp_th, tam_th):
-    amp_key = norm_amp(prv_th, amp_th)
-    key = (norm(prv_th), amp_key, norm(tam_th))
+def _prefix_candidates(target, options):
+    target = target.strip()
+    return [o for o in options if o.startswith(target) or target.startswith(o)]
+
+def _edit_distance_at_most_1(a, b):
+    if a == b:
+        return True
+    la, lb = len(a), len(b)
+    if abs(la - lb) > 1:
+        return False
+    if la == lb:
+        return sum(1 for x, y in zip(a, b) if x != y) <= 1
+    shorter, longer = (a, b) if la < lb else (b, a)
+    i = j = edits = 0
+    while i < len(shorter) and j < len(longer):
+        if shorter[i] == longer[j]:
+            i += 1; j += 1
+        else:
+            edits += 1
+            if edits > 1:
+                return False
+            j += 1
+    return True
+
+def _near_candidates(target, options):
+    return [o for o in options if _edit_distance_at_most_1(target, o)]
+
+def _resolve_amphoe(prv, prv_node, amp):
+    if amp in prv_node:
+        return amp
+    candidates = _prefix_candidates(amp, prv_node.keys())
+    if len(candidates) == 1:
+        return candidates[0]
+    if amp == prv:
+        capital = 'เมือง' + prv
+        if capital in prv_node:
+            return capital
+    candidates = _near_candidates(amp, prv_node.keys())
+    if len(candidates) == 1:
+        return candidates[0]
+    return None
+
+def _nearest_by_centroid(candidates, tam_node, bbox_center):
+    if not bbox_center:
+        return None
+    cx, cy = bbox_center
+    best, best_d = None, None
+    for c in candidates:
+        villages = tam_node[c]
+        if not villages:
+            continue
+        vx = sum(v["lon"] for v in villages) / len(villages)
+        vy = sum(v["lat"] for v in villages) / len(villages)
+        d = (vx - cx) ** 2 + (vy - cy) ** 2
+        if best_d is None or d < best_d:
+            best, best_d = c, d
+    return best
+
+def _resolve_tambon(tam_node, tam, bbox_center=None):
+    if tam in tam_node:
+        return tam
+    candidates = _prefix_candidates(tam, tam_node.keys())
+    if len(candidates) == 1:
+        return candidates[0]
+    if len(candidates) > 1:
+        picked = _nearest_by_centroid(candidates, tam_node, bbox_center)
+        if picked:
+            return picked
+    candidates = _near_candidates(tam, tam_node.keys())
+    if len(candidates) == 1:
+        return candidates[0]
+    return None
+
+def lookup(prv_th, amp_th, tam_th, bbox_center=None):
+    """Returns (villages, real_amp_name, real_tam_name). The boundary
+    shapefile has a handful of corrupted Thai district/subdistrict names in
+    some provinces (DBF-width truncation, a dropped 'เมือง' prefix, or a
+    single-character spelling slip) so we fall back to prefix / near-miss
+    matching against the authoritative DOPA names before giving up. When a
+    truncated name is an ambiguous prefix of several real names (e.g. two
+    subdistricts both starting the same way), we disambiguate using which
+    candidate's villages are geographically closest to the tambon's bbox
+    center."""
+    prv, amp, tam = norm(prv_th), norm(amp_th), norm(tam_th)
+    key = (prv, amp, tam)
     if key in village_index:
-        return village_index[key]
-    fallback_prv = PROVINCE_FALLBACK.get(norm(prv_th))
-    if fallback_prv:
-        key2 = (fallback_prv, amp_key, norm(tam_th))
-        if key2 in village_index:
-            return village_index[key2]
-    return []
+        return village_index[key], amp, tam
+
+    prv_node = nested_index.get(prv)
+    if not prv_node:
+        return [], amp, tam
+
+    real_amp = _resolve_amphoe(prv, prv_node, amp)
+    if real_amp is None:
+        return [], amp, tam
+
+    real_tam = _resolve_tambon(prv_node[real_amp], tam, bbox_center)
+    if real_tam is None:
+        return [], real_amp, tam
+
+    return prv_node[real_amp][real_tam], real_amp, real_tam
 
 index = {}  # province_th -> {en, amphoes: {amp_th -> {en, tambons: [...]}}}
 stats = {"total_tambon": 0, "matched": 0, "unmatched": 0, "matched_villages": 0}
@@ -86,7 +167,11 @@ for pdir in province_dirs:
         tam_en = norm(rec.get('ADM3_EN'))
         pcode = norm(rec.get('ADM3_PCODE'))
 
-        villages = lookup_villages(prv_th, amp_th, tam_th)
+        bbox = list(shape.bbox) if shape.bbox else None
+        bbox_center = ((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2) if bbox else None
+        villages, real_amp_th, real_tam_th = lookup(prv_th, amp_th, tam_th, bbox_center)
+        # prefer the authoritative (untruncated, current) DOPA names for display
+        amp_th, tam_th = real_amp_th, real_tam_th
 
         stats["total_tambon"] += 1
         if villages:
@@ -96,7 +181,6 @@ for pdir in province_dirs:
             stats["unmatched"] += 1
             unmatched_list.append(f"{prv_th} / {amp_th} / {tam_th}")
 
-        # Build polygon rings (list of [lon,lat] rings) from shapefile parts
         points = shape.points
         parts = list(shape.parts) + [len(points)]
         rings = []
@@ -127,7 +211,6 @@ for pdir in province_dirs:
             "th": tam_th, "en": tam_en, "pcode": pcode, "village_count": len(villages)
         })
 
-# Convert index dict -> sorted list structure for JSON output
 provinces_out = []
 for prv_th in sorted(index.keys()):
     prv_node = index[prv_th]
