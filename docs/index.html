@@ -3,69 +3,304 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แผนที่ตำบล + รายชื่อหมู่บ้าน (เพื่อการศึกษา)</title>
+<title>แผนที่ตำบล · Learning T-Map</title>
+<meta name="description" content="แผนที่ตำบลและรายชื่อหมู่บ้าน พร้อมเครื่องมือสร้าง prompt แผนที่แหล่งเรียนรู้ ศกร.ระดับตำบล">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1220'/%3E%3Cpath d='M5 21c4-3 7 1 11-2s6 1 11-2' stroke='%2338bdf8' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M5 26c4-3 7 1 11-2s6 1 11-2' stroke='%230ea5e9' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='.55'/%3E%3Cpath d='M16 4a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5Z' fill='%2334d399'/%3E%3Ccircle cx='16' cy='9' r='1.9' fill='%230b1220'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="site-header">
-  <h1>แผนที่ตำบล + รายชื่อหมู่บ้าน</h1>
-  <p class="subtitle">เลือกจังหวัด → อำเภอ → ตำบล แล้วดาวน์โหลดภาพแผนที่พร้อมรายชื่อหมู่บ้านทั้งหมด (ใช้เพื่อการศึกษา ไม่มีค่าใช้จ่าย)</p>
+
+<!-- ============ intro modal ============ -->
+<div class="modal-backdrop" id="intro-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+    <div class="modal-logo">
+      <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
+        <defs>
+          <linearGradient id="mlg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#34d399"/>
+          </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="13" fill="#0e1729" stroke="url(#mlg)" stroke-width="1.5"/>
+        <path d="M8 31c6-4.5 10.5 1.5 16.5-3S37 26 40 23.5" stroke="#38bdf8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <path d="M8 38c6-4.5 10.5 1.5 16.5-3S37 33 40 30.5" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>
+        <path d="M24 6a7.5 7.5 0 0 0-7.5 7.5C16.5 19 24 26 24 26s7.5-7 7.5-12.5A7.5 7.5 0 0 0 24 6Z" fill="url(#mlg)"/>
+        <circle cx="24" cy="13.5" r="2.9" fill="#0e1729"/>
+      </svg>
+    </div>
+    <h2 id="intro-title">แผนที่ตำบล <span class="brand-en">Learning T-Map</span></h2>
+    <p class="modal-lead">เครื่องมือสำหรับครูและบุคลากร สกร. ใช้ประกอบการจัดทำแผนที่แหล่งเรียนรู้ระดับตำบล</p>
+
+    <div class="modal-points">
+      <div class="mp">
+        <span class="mp-ico">🗺️</span>
+        <div><b>ดูแผนที่ตำบลพร้อมหมู่บ้าน</b>
+          <p>เลือกจังหวัด → อำเภอ → ตำบล แล้วดูขอบเขตตำบลพร้อมตำแหน่งและชื่อหมู่บ้านครบทุกหมู่ ดาวน์โหลดเป็นภาพ PNG ได้ฟรี</p></div>
+      </div>
+      <div class="mp">
+        <span class="mp-ico">✨</span>
+        <div><b>สร้าง prompt แผนที่แหล่งเรียนรู้</b>
+          <p>กรอกข้อมูลแหล่งเรียนรู้ในตำบล ระบบจะสร้างคำสั่ง (prompt) ให้คัดลอกไปใช้กับ AI สร้างภาพตัวอื่นได้ทันที</p></div>
+      </div>
+      <div class="mp">
+        <span class="mp-ico">🧊</span>
+        <div><b>มุมมอง 3 มิติ</b>
+          <p>สลับดูแผนที่แบบยกระดับ 3 มิติ เพื่อให้เห็นภาพรวมพื้นที่ชัดเจนขึ้น</p></div>
+      </div>
+    </div>
+
+    <div class="modal-warn">
+      <b>โปรดทราบก่อนใช้งาน</b>
+      <ul>
+        <li>ข้อมูลนี้จัดทำ<b>เพื่อการศึกษา</b> ไม่ใช่เอกสารราชการ และไม่ควรใช้อ้างอิงทางกฎหมายหรือการรังวัดที่ดิน</li>
+        <li>เส้นแบ่งพื้นที่รายหมู่บ้านเป็นการ<b>คำนวณโดยประมาณ</b> (Voronoi) จากพิกัดหมู่บ้าน <b>ไม่ใช่ขอบเขตปกครองจริง</b></li>
+        <li>ข้อมูลกรุงเทพมหานครไม่มีรายชื่อหมู่บ้าน เพราะใช้ระบบเขต/แขวง ไม่ใช่ตำบล/หมู่บ้าน</li>
+      </ul>
+    </div>
+
+    <label class="modal-check">
+      <input type="checkbox" id="intro-dontshow"> ไม่ต้องแสดงข้อความนี้อีก
+    </label>
+    <button class="btn-primary btn-block" id="intro-close">เข้าใช้งานระบบ</button>
+  </div>
+</div>
+
+<!-- ============ header ============ -->
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+      <defs>
+        <linearGradient id="blg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#34d399"/>
+        </linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="13" fill="#0e1729" stroke="url(#blg)" stroke-width="1.5"/>
+      <path d="M8 31c6-4.5 10.5 1.5 16.5-3S37 26 40 23.5" stroke="#38bdf8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M8 38c6-4.5 10.5 1.5 16.5-3S37 33 40 30.5" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>
+      <path d="M24 6a7.5 7.5 0 0 0-7.5 7.5C16.5 19 24 26 24 26s7.5-7 7.5-12.5A7.5 7.5 0 0 0 24 6Z" fill="url(#blg)"/>
+      <circle cx="24" cy="13.5" r="2.9" fill="#0e1729"/>
+    </svg>
+    <div class="brand-text">
+      <div class="brand-title">Learning T-Map</div>
+      <div class="brand-sub">แผนที่ตำบล · แหล่งเรียนรู้ระดับตำบล</div>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-ico">⌕</span>
+    <input type="text" id="search-input" placeholder="ค้นหาตำบล เช่น นางลือ, หัวขวาง, บ้านกล้วย..." autocomplete="off">
+    <div class="search-results" id="search-results" hidden></div>
+  </div>
+
+  <div class="topbar-actions">
+    <button class="btn-ghost" id="about-btn">เกี่ยวกับระบบ</button>
+    <a class="btn-ghost" href="https://catalog.dopa.go.th/dataset/gis-01" target="_blank" rel="noopener">แหล่งข้อมูล</a>
+  </div>
 </header>
 
-<main>
-  <section class="selectors">
-    <div class="field">
-      <label for="province-select">จังหวัด</label>
-      <select id="province-select"><option value="">-- เลือกจังหวัด --</option></select>
-    </div>
-    <div class="field">
-      <label for="amphoe-select">อำเภอ / เขต</label>
-      <select id="amphoe-select" disabled><option value="">-- เลือกอำเภอ --</option></select>
-    </div>
-    <div class="field">
-      <label for="tambon-select">ตำบล / แขวง</label>
-      <select id="tambon-select" disabled><option value="">-- เลือกตำบล --</option></select>
-    </div>
-  </section>
+<!-- ============ main 3-column layout ============ -->
+<div class="layout">
 
-  <section id="status" class="status" hidden></section>
+  <!-- left: selectors + layers -->
+  <aside class="panel panel-left">
+    <section class="card">
+      <h3 class="card-title">เลือกพื้นที่</h3>
+      <div class="field">
+        <label for="province-select">จังหวัด</label>
+        <select id="province-select"><option value="">-- เลือกจังหวัด --</option></select>
+      </div>
+      <div class="field">
+        <label for="amphoe-select">อำเภอ / เขต</label>
+        <select id="amphoe-select" disabled><option value="">-- เลือกอำเภอ --</option></select>
+      </div>
+      <div class="field">
+        <label for="tambon-select">ตำบล / แขวง</label>
+        <select id="tambon-select" disabled><option value="">-- เลือกตำบล --</option></select>
+      </div>
+    </section>
 
-  <section id="result" class="result" hidden>
-    <div class="voronoi-toggle">
-      <label>
-        <input type="checkbox" id="voronoi-checkbox" checked>
-        แสดงเส้นแบ่งพื้นที่โดยประมาณต่อหมู่บ้าน
+    <section class="card">
+      <h3 class="card-title">ชั้นข้อมูลและมุมมอง</h3>
+
+      <label class="switch">
+        <input type="checkbox" id="labels-checkbox" checked>
+        <span class="sw-track"><span class="sw-thumb"></span></span>
+        <span class="sw-label">
+          <b>ชื่อหมู่บ้านบนแผนที่</b>
+          <i>แสดงชื่อกำกับทุกหมุดหมู่บ้าน</i>
+        </span>
       </label>
-      <p class="voronoi-note">
-        ⚠️ เส้นแบ่งนี้คำนวณด้วยคณิตศาสตร์ (Voronoi) จากพิกัดหมู่บ้านเท่านั้น
-        <strong>ไม่ใช่ขอบเขตปกครองที่เป็นทางการ</strong> ใช้เป็นตัวช่วยกะระยะโดยประมาณว่า
-        แต่ละหมู่บ้านอยู่บริเวณไหนของตำบลเท่านั้น
-      </p>
-    </div>
-    <div class="canvas-wrap">
-      <canvas id="map-canvas"></canvas>
-    </div>
-    <div class="actions">
-      <button id="download-png-btn">ดาวน์โหลดภาพ PNG</button>
-      <span id="village-count-label"></span>
-    </div>
-  </section>
-</main>
 
-<footer class="site-footer">
-  <p>
-    ข้อมูลขอบเขตตำบลจากโครงการ
-    <a href="https://github.com/prasertcbs/thailand_gis" target="_blank" rel="noopener">prasertcbs/thailand_gis</a>
-    (แปลงจาก HDX COD-AB Thailand) ข้อมูลรายชื่อและพิกัดหมู่บ้านจาก
-    <a href="https://catalog.dopa.go.th/dataset/gis-01" target="_blank" rel="noopener">กรมการปกครอง กระทรวงมหาดไทย</a>
-    (ปรับปรุงล่าสุด มิ.ย. 2568) ใช้เพื่อการศึกษาเท่านั้น
-    ข้อมูลเขต/แขวงในกรุงเทพมหานครไม่มีรายชื่อหมู่บ้าน เนื่องจากกรุงเทพฯ ไม่ได้อยู่ในระบบ
-    อำเภอ/ตำบล/หมู่บ้านแบบจังหวัดอื่น
-  </p>
+      <label class="switch">
+        <input type="checkbox" id="voronoi-checkbox" checked>
+        <span class="sw-track"><span class="sw-thumb"></span></span>
+        <span class="sw-label">
+          <b>เส้นแบ่งพื้นที่โดยประมาณ</b>
+          <i class="warn-i">คำนวณจากพิกัด (Voronoi) — ไม่ใช่เขตปกครองจริง</i>
+        </span>
+      </label>
+
+      <label class="switch">
+        <input type="checkbox" id="three-d-checkbox">
+        <span class="sw-track"><span class="sw-thumb"></span></span>
+        <span class="sw-label">
+          <b>มุมมอง 3 มิติ</b>
+          <i>ยกระดับแผนที่ให้เห็นมิติความลึก</i>
+        </span>
+      </label>
+
+      <div class="field field-inline" id="tilt-field" hidden>
+        <label for="tilt-range">องศาการเอียง</label>
+        <input type="range" id="tilt-range" min="15" max="60" value="38">
+      </div>
+
+      <div class="field">
+        <label for="theme-select">โทนสีของภาพแผนที่</label>
+        <select id="theme-select">
+          <option value="dark" selected>โทนมืด (Dark)</option>
+          <option value="light">โทนสว่าง (สำหรับพิมพ์เอกสาร)</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="card card-legend">
+      <h3 class="card-title">สัญลักษณ์</h3>
+      <div class="lg-row"><span class="lg-dot"></span> ตำแหน่งหมู่บ้าน</div>
+      <div class="lg-row"><span class="lg-line"></span> ขอบเขตตำบล (ข้อมูลจริง)</div>
+      <div class="lg-row"><span class="lg-dash"></span> เส้นแบ่งโดยประมาณ (คำนวณ)</div>
+    </section>
+  </aside>
+
+  <!-- center: map -->
+  <main class="panel panel-center">
+    <div class="map-head">
+      <div id="map-title-wrap">
+        <h2 id="map-title">ยังไม่ได้เลือกตำบล</h2>
+        <p id="map-subtitle">เลือกจังหวัด อำเภอ และตำบล จากแผงด้านซ้าย เพื่อแสดงแผนที่</p>
+      </div>
+      <div class="map-stats" id="map-stats" hidden>
+        <div class="stat"><b id="stat-villages">0</b><span>หมู่บ้าน</span></div>
+        <div class="stat"><b id="stat-pcode">-</b><span>รหัสพื้นที่</span></div>
+      </div>
+    </div>
+
+    <div id="status" class="status" hidden></div>
+
+    <div class="canvas-shell">
+      <div class="canvas-empty" id="canvas-empty">
+        <div class="ce-ico">🗺️</div>
+        <p>เลือกตำบลเพื่อแสดงแผนที่</p>
+      </div>
+      <canvas id="map-canvas" hidden></canvas>
+    </div>
+
+    <div class="map-toolbar" id="map-toolbar" hidden>
+      <button class="btn-primary" id="download-png-btn">⬇ ดาวน์โหลดภาพ PNG</button>
+      <button class="btn-ghost" id="reset-view-btn">รีเซ็ตมุมมอง</button>
+      <span class="toolbar-note" id="village-count-label"></span>
+    </div>
+  </main>
+
+  <!-- right: prompt builder -->
+  <aside class="panel panel-right">
+    <section class="card card-accent">
+      <h3 class="card-title">
+        <span class="ct-ico">✨</span> สร้าง Prompt แผนที่แหล่งเรียนรู้
+      </h3>
+      <p class="card-desc">
+        กรอกข้อมูลด้านล่าง ระบบจะสร้างคำสั่งภาษาไทยให้อัตโนมัติ
+        คัดลอกไปวางใน AI สร้างภาพตัวใดก็ได้ (เช่น Claude, ChatGPT, Gemini, Midjourney)
+      </p>
+
+      <div class="pb-empty" id="pb-empty">
+        เลือกตำบลก่อน แล้วช่องข้อมูลจะถูกเติมให้อัตโนมัติ
+      </div>
+
+      <div id="pb-form" hidden>
+        <div class="field">
+          <label for="pb-school">ชื่อสถานศึกษา / ศกร.</label>
+          <input type="text" id="pb-school" placeholder="เช่น ศกร.ตำบลนางลือ">
+        </div>
+
+        <div class="field">
+          <label for="pb-resources">แหล่งเรียนรู้ในตำบล <span class="req">*</span></label>
+          <textarea id="pb-resources" rows="4"
+            placeholder="พิมพ์บรรทัดละ 1 แห่ง เช่น&#10;วัดนางลือ - แหล่งเรียนรู้ประวัติศาสตร์ท้องถิ่น&#10;กลุ่มทอผ้าบ้านดอนตานนท์ - ภูมิปัญญาท้องถิ่น&#10;ศูนย์เรียนรู้เกษตรพอเพียง"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="pb-highlight">จุดเด่น / อัตลักษณ์ชุมชน</label>
+          <textarea id="pb-highlight" rows="2"
+            placeholder="เช่น ชุมชนเกษตรริมแม่น้ำ มีประเพณีบุญบั้งไฟ"></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="pb-style">รูปแบบภาพ</label>
+            <select id="pb-style">
+              <option>แผนที่ภาพประกอบ (illustrated map) สีสันสดใส</option>
+              <option>อินโฟกราฟิก (infographic) เรียบ ทันสมัย</option>
+              <option>แผนที่ 3 มิติ มุมมองจากมุมสูง (isometric)</option>
+              <option>ภาพลายเส้นสีน้ำ (watercolor sketch)</option>
+              <option>ภาพวาดการ์ตูนน่ารัก เหมาะกับสื่อการสอน</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="pb-ratio">สัดส่วนภาพ</label>
+            <select id="pb-ratio">
+              <option value="4:3 (แนวนอน)">4:3 แนวนอน</option>
+              <option value="16:9 (แนวนอน)">16:9 แนวนอน</option>
+              <option value="1:1 (จัตุรัส)">1:1 จัตุรัส</option>
+              <option value="3:4 (แนวตั้ง)">3:4 แนวตั้ง</option>
+              <option value="A4 แนวตั้ง">A4 แนวตั้ง</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pb-tone">โทนสี</label>
+            <select id="pb-tone">
+              <option>โทนสดใส เขียว-ฟ้า บรรยากาศชนบทไทย</option>
+              <option>โทนอบอุ่น ส้ม-น้ำตาล บรรยากาศท้องถิ่น</option>
+              <option>โทนพาสเทลอ่อน อ่านง่าย</option>
+              <option>โทนทางการ น้ำเงิน-ขาว</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="mini-check">
+          <input type="checkbox" id="pb-include-villages" checked>
+          แนบรายชื่อหมู่บ้านทั้งหมดลงใน prompt
+        </label>
+
+        <div class="field">
+          <label for="pb-output">Prompt ที่ได้ <span class="hint">(แก้ไขได้)</span></label>
+          <textarea id="pb-output" rows="12" spellcheck="false"></textarea>
+        </div>
+
+        <div class="pb-actions">
+          <button class="btn-primary btn-block" id="pb-copy">📋 คัดลอก Prompt</button>
+          <button class="btn-ghost btn-block" id="pb-reset">สร้างใหม่จากข้อมูลล่าสุด</button>
+        </div>
+        <p class="pb-note">
+          💡 prompt นี้ใช้สำหรับ<b>สร้างภาพประกอบ</b> ผลลัพธ์จาก AI เป็นภาพเชิงสื่อสาร
+          ไม่ใช่แผนที่เชิงพิกัดที่ถูกต้องตามภูมิศาสตร์
+        </p>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<footer class="sitefoot">
+  ขอบเขตตำบล — <a href="https://github.com/prasertcbs/thailand_gis" target="_blank" rel="noopener">thailand_gis</a> (HDX COD-AB Thailand)
+  · รายชื่อและพิกัดหมู่บ้าน — <a href="https://catalog.dopa.go.th/dataset/gis-01" target="_blank" rel="noopener">กรมการปกครอง กระทรวงมหาดไทย</a>
+  · จัดทำเพื่อการศึกษา ไม่ใช่เอกสารราชการ
 </footer>
+
+<div class="toast" id="toast" hidden></div>
 
 <script src="app.js"></script>
 </body>
