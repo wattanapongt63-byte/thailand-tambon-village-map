@@ -1,0 +1,151 @@
+:root {
+  --bg: #f6f5f1;
+  --panel: #ffffff;
+  --ink: #21201c;
+  --muted: #6b6a66;
+  --accent: #2f6f4f;
+  --accent-dark: #1f4d36;
+  --border: #e2e0d8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.site-header {
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.6rem;
+  color: var(--accent-dark);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+}
+
+.selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.2rem;
+}
+
+.field {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+}
+
+select:disabled {
+  background: #f1f0ec;
+  color: var(--muted);
+}
+
+.status {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  background: #fff8e6;
+  border: 1px solid #eddca6;
+  color: #6b5a1a;
+  font-size: 0.9rem;
+}
+
+.result {
+  margin-top: 1.5rem;
+}
+
+.canvas-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+#map-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: var(--accent-dark);
+}
+
+#village-count-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.site-footer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.site-footer a {
+  color: var(--accent-dark);
+}

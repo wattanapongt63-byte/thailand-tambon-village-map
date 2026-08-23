@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แผนที่ตำบล + รายชื่อหมู่บ้าน (เพื่อการศึกษา)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <h1>แผนที่ตำบล + รายชื่อหมู่บ้าน</h1>
+  <p class="subtitle">เลือกจังหวัด → อำเภอ → ตำบล แล้วดาวน์โหลดภาพแผนที่พร้อมรายชื่อหมู่บ้านทั้งหมด (ใช้เพื่อการศึกษา ไม่มีค่าใช้จ่าย)</p>
+</header>
+
+<main>
+  <section class="selectors">
+    <div class="field">
+      <label for="province-select">จังหวัด</label>
+      <select id="province-select"><option value="">-- เลือกจังหวัด --</option></select>
+    </div>
+    <div class="field">
+      <label for="amphoe-select">อำเภอ / เขต</label>
+      <select id="amphoe-select" disabled><option value="">-- เลือกอำเภอ --</option></select>
+    </div>
+    <div class="field">
+      <label for="tambon-select">ตำบล / แขวง</label>
+      <select id="tambon-select" disabled><option value="">-- เลือกตำบล --</option></select>
+    </div>
+  </section>
+
+  <section id="status" class="status" hidden></section>
+
+  <section id="result" class="result" hidden>
+    <div class="canvas-wrap">
+      <canvas id="map-canvas"></canvas>
+    </div>
+    <div class="actions">
+      <button id="download-png-btn">ดาวน์โหลดภาพ PNG</button>
+      <span id="village-count-label"></span>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>
+    ข้อมูลขอบเขตตำบลและรายชื่อหมู่บ้านมาจากโครงการ
+    <a href="https://github.com/prasertcbs/thailand_gis" target="_blank" rel="noopener">prasertcbs/thailand_gis</a>
+    (แปลงจาก HDX COD-AB Thailand และ TH_VILLAGE2012) ใช้เพื่อการศึกษาเท่านั้น
+    ข้อมูลบางตำบล (โดยเฉพาะเขต/แขวงในกรุงเทพมหานคร และตำบลที่ไม่มีในชุดข้อมูลปี 2012)
+    อาจไม่มีรายชื่อหมู่บ้านครบถ้วนหรือไม่มีเลย
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

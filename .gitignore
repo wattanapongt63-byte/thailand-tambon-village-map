@@ -1,0 +1,4 @@
+data/raw/
+data/processed/
+data/province_zip_list.txt
+.DS_Store
