@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แผนที่ตำบล · Learning T-Map</title>
 <meta name="description" content="แผนที่ตำบลและรายชื่อหมู่บ้าน พร้อมเครื่องมือสร้าง prompt แผนที่แหล่งเรียนรู้ ศกร.ระดับตำบล">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1220'/%3E%3Cpath d='M5 21c4-3 7 1 11-2s6 1 11-2' stroke='%2338bdf8' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M5 26c4-3 7 1 11-2s6 1 11-2' stroke='%230ea5e9' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='.55'/%3E%3Cpath d='M16 4a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5Z' fill='%2334d399'/%3E%3Ccircle cx='16' cy='9' r='1.9' fill='%230b1220'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1220'/%3E%3Cpath d='M5 21c4-3 7 1 11-2s6 1 11-2' stroke='%23d4af37' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M5 26c4-3 7 1 11-2s6 1 11-2' stroke='%23b8912f' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M16 4a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5Z' fill='%23f0c94a'/%3E%3Ccircle cx='16' cy='9' r='1.9' fill='%230b1220'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,17 +17,38 @@
 <div class="modal-backdrop" id="intro-modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="intro-title">
     <div class="modal-logo">
-      <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
+      <svg class="logo-svg logo-lg" viewBox="0 0 48 48" width="60" height="60" aria-hidden="true">
         <defs>
-          <linearGradient id="mlg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#34d399"/>
+          <linearGradient id="mGoldA" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7a5c12"/>
+            <stop offset="28%" stop-color="#d4af37"/>
+            <stop offset="50%" stop-color="#f9e79f"/>
+            <stop offset="72%" stop-color="#d4af37"/>
+            <stop offset="100%" stop-color="#8a6a1f"/>
           </linearGradient>
+          <linearGradient id="mGoldB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fdf0b8"/>
+            <stop offset="40%" stop-color="#e3bf45"/>
+            <stop offset="100%" stop-color="#9c7a1e"/>
+          </linearGradient>
+          <linearGradient id="mShine" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+            <stop offset="45%" stop-color="#fff" stop-opacity=".78"/>
+            <stop offset="55%" stop-color="#fff" stop-opacity=".78"/>
+            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+          <clipPath id="mClip"><rect width="48" height="48" rx="13"/></clipPath>
         </defs>
-        <rect width="48" height="48" rx="13" fill="#0e1729" stroke="url(#mlg)" stroke-width="1.5"/>
-        <path d="M8 31c6-4.5 10.5 1.5 16.5-3S37 26 40 23.5" stroke="#38bdf8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <path d="M8 38c6-4.5 10.5 1.5 16.5-3S37 33 40 30.5" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>
-        <path d="M24 6a7.5 7.5 0 0 0-7.5 7.5C16.5 19 24 26 24 26s7.5-7 7.5-12.5A7.5 7.5 0 0 0 24 6Z" fill="url(#mlg)"/>
-        <circle cx="24" cy="13.5" r="2.9" fill="#0e1729"/>
+        <rect width="48" height="48" rx="13" fill="#0e1729" stroke="url(#mGoldA)" stroke-width="1.6"/>
+        <g clip-path="url(#mClip)">
+          <path d="M8 31c6-4.5 10.5 1.5 16.5-3S37 26 40 23.5" stroke="url(#mGoldA)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path d="M8 38c6-4.5 10.5 1.5 16.5-3S37 33 40 30.5" stroke="#b8912f" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"/>
+          <path d="M24 6a7.5 7.5 0 0 0-7.5 7.5C16.5 19 24 26 24 26s7.5-7 7.5-12.5A7.5 7.5 0 0 0 24 6Z" fill="url(#mGoldB)"/>
+          <circle cx="24" cy="13.5" r="2.9" fill="#0e1729"/>
+          <g class="shine-g">
+            <rect x="-26" y="-14" width="13" height="76" fill="url(#mShine)" transform="rotate(18 24 24)"></rect>
+          </g>
+        </g>
       </svg>
     </div>
     <h2 id="intro-title">แผนที่ตำบล <span class="brand-en">Learning T-Map</span></h2>
@@ -70,17 +91,38 @@
 <!-- ============ header ============ -->
 <header class="topbar">
   <div class="brand">
-    <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+    <svg class="logo-svg" viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
       <defs>
-        <linearGradient id="blg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#34d399"/>
+        <linearGradient id="bGoldA" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7a5c12"/>
+          <stop offset="28%" stop-color="#d4af37"/>
+          <stop offset="50%" stop-color="#f9e79f"/>
+          <stop offset="72%" stop-color="#d4af37"/>
+          <stop offset="100%" stop-color="#8a6a1f"/>
         </linearGradient>
+        <linearGradient id="bGoldB" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fdf0b8"/>
+          <stop offset="40%" stop-color="#e3bf45"/>
+          <stop offset="100%" stop-color="#9c7a1e"/>
+        </linearGradient>
+        <linearGradient id="bShine" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="45%" stop-color="#fff" stop-opacity=".72"/>
+          <stop offset="55%" stop-color="#fff" stop-opacity=".72"/>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="bClip"><rect width="48" height="48" rx="13"/></clipPath>
       </defs>
-      <rect width="48" height="48" rx="13" fill="#0e1729" stroke="url(#blg)" stroke-width="1.5"/>
-      <path d="M8 31c6-4.5 10.5 1.5 16.5-3S37 26 40 23.5" stroke="#38bdf8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <path d="M8 38c6-4.5 10.5 1.5 16.5-3S37 33 40 30.5" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>
-      <path d="M24 6a7.5 7.5 0 0 0-7.5 7.5C16.5 19 24 26 24 26s7.5-7 7.5-12.5A7.5 7.5 0 0 0 24 6Z" fill="url(#blg)"/>
-      <circle cx="24" cy="13.5" r="2.9" fill="#0e1729"/>
+      <rect width="48" height="48" rx="13" fill="#0e1729" stroke="url(#bGoldA)" stroke-width="1.6"/>
+      <g clip-path="url(#bClip)">
+        <path d="M8 31c6-4.5 10.5 1.5 16.5-3S37 26 40 23.5" stroke="url(#bGoldA)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <path d="M8 38c6-4.5 10.5 1.5 16.5-3S37 33 40 30.5" stroke="#b8912f" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"/>
+        <path d="M24 6a7.5 7.5 0 0 0-7.5 7.5C16.5 19 24 26 24 26s7.5-7 7.5-12.5A7.5 7.5 0 0 0 24 6Z" fill="url(#bGoldB)"/>
+        <circle cx="24" cy="13.5" r="2.9" fill="#0e1729"/>
+        <g class="shine-g">
+          <rect x="-26" y="-14" width="13" height="76" fill="url(#bShine)" transform="rotate(18 24 24)"></rect>
+        </g>
+      </g>
     </svg>
     <div class="brand-text">
       <div class="brand-title">Learning T-Map</div>
