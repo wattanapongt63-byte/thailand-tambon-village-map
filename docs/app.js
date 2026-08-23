@@ -353,9 +353,24 @@ function nearestPointIndex(x, y, points) {
   return best;
 }
 
+const LABEL_DIRS = [
+  { dx: 1, dy: 0 }, { dx: 1, dy: -1 }, { dx: 0, dy: -1 }, { dx: -1, dy: -1 },
+  { dx: -1, dy: 0 }, { dx: -1, dy: 1 }, { dx: 0, dy: 1 }, { dx: 1, dy: 1 },
+];
+const LABEL_RADII = [7, 12, 18, 26, 36];
+
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// Places each village's name next to its point, trying 8 directions at
+// increasing distance and skipping any position that would overlap an
+// already-placed label or point marker. Falls back to a plain number
+// (matching the legend below) when no free spot can be found nearby.
 function drawVillages(villages, bounds, mapRect) {
-  villages.forEach((v, i) => {
-    const [x, y] = project(v.lon, v.lat, bounds, mapRect);
+  const points = villages.map(v => project(v.lon, v.lat, bounds, mapRect));
+
+  points.forEach(([x, y]) => {
     ctx.beginPath();
     ctx.arc(x, y, 3.2, 0, Math.PI * 2);
     ctx.fillStyle = '#c0392b';
@@ -363,13 +378,51 @@ function drawVillages(villages, bounds, mapRect) {
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 0.8;
     ctx.stroke();
+  });
 
-    if (villages.length <= 40) {
+  ctx.save();
+  ctx.textBaseline = 'top';
+  ctx.font = '400 10px Sarabun, sans-serif';
+  const LABEL_H = 12;
+  const GAP = 3;
+
+  const placedBoxes = points.map(([x, y]) => ({ x: x - 5, y: y - 5, w: 10, h: 10 }));
+
+  villages.forEach((v, i) => {
+    const [px, py] = points[i];
+    const textW = ctx.measureText(v.name).width;
+
+    let chosen = null;
+    outer:
+    for (const r of LABEL_RADII) {
+      for (const { dx, dy } of LABEL_DIRS) {
+        const anchorX = px + dx * r;
+        const anchorY = py + dy * r;
+        const align = dx > 0 ? 'left' : dx < 0 ? 'right' : 'center';
+        const boxX = align === 'left' ? anchorX : align === 'right' ? anchorX - textW : anchorX - textW / 2;
+        const boxY = dy > 0 ? anchorY : dy < 0 ? anchorY - LABEL_H : anchorY - LABEL_H / 2;
+        const box = { x: boxX - GAP, y: boxY - GAP, w: textW + GAP * 2, h: LABEL_H + GAP * 2 };
+        if (box.x < mapRect.x || box.x + box.w > mapRect.x + mapRect.w) continue;
+        if (box.y < mapRect.y || box.y + box.h > mapRect.y + mapRect.h) continue;
+        if (placedBoxes.some(pb => rectsOverlap(box, pb))) continue;
+        chosen = { anchorX, anchorY, align, box };
+        break outer;
+      }
+    }
+
+    if (chosen) {
+      placedBoxes.push(chosen.box);
       ctx.fillStyle = '#21201c';
-      ctx.font = '400 9px Sarabun, sans-serif';
-      ctx.fillText(String(i + 1), x + 4, y - 9);
+      ctx.textAlign = chosen.align;
+      ctx.fillText(v.name, chosen.anchorX, chosen.anchorY);
+    } else {
+      ctx.fillStyle = '#21201c';
+      ctx.textAlign = 'left';
+      ctx.fillText(String(i + 1), px + 5, py - 5);
     }
   });
+
+  ctx.restore();
 }
 
 function truncateToWidth(ctx2d, text, maxWidth) {
