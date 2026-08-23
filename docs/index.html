@@ -34,6 +34,17 @@
   <section id="status" class="status" hidden></section>
 
   <section id="result" class="result" hidden>
+    <div class="voronoi-toggle">
+      <label>
+        <input type="checkbox" id="voronoi-checkbox" checked>
+        แสดงเส้นแบ่งพื้นที่โดยประมาณต่อหมู่บ้าน
+      </label>
+      <p class="voronoi-note">
+        ⚠️ เส้นแบ่งนี้คำนวณด้วยคณิตศาสตร์ (Voronoi) จากพิกัดหมู่บ้านเท่านั้น
+        <strong>ไม่ใช่ขอบเขตปกครองที่เป็นทางการ</strong> ใช้เป็นตัวช่วยกะระยะโดยประมาณว่า
+        แต่ละหมู่บ้านอยู่บริเวณไหนของตำบลเท่านั้น
+      </p>
+    </div>
     <div class="canvas-wrap">
       <canvas id="map-canvas"></canvas>
     </div>

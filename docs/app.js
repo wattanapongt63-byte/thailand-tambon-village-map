@@ -9,6 +9,7 @@ const canvas = document.getElementById('map-canvas');
 const ctx = canvas.getContext('2d');
 const downloadBtn = document.getElementById('download-png-btn');
 const villageCountLabel = document.getElementById('village-count-label');
+const voronoiCheckbox = document.getElementById('voronoi-checkbox');
 
 let indexData = null;
 let currentTambon = null;
@@ -96,6 +97,10 @@ tambonSelect.addEventListener('change', async () => {
   }
 });
 
+voronoiCheckbox.addEventListener('change', () => {
+  if (currentTambon) renderMap(currentTambon);
+});
+
 downloadBtn.addEventListener('click', () => {
   if (!currentTambon) return;
   const link = document.createElement('a');
@@ -117,9 +122,12 @@ function renderMap(t) {
     ? `พบหมู่บ้านทั้งหมด ${villages.length} หมู่บ้าน`
     : 'ไม่มีข้อมูลหมู่บ้านสำหรับตำบลนี้ในชุดข้อมูล';
 
+  const showVoronoi = voronoiCheckbox.checked && villages.length >= 2;
+
   // ---- layout constants (CSS px) ----
   const PAD = 24;
   const TITLE_H = 92;
+  const BANNER_H = showVoronoi ? 40 : 0;
   const MAP_H = 520;
   const LEGEND_COL_W = 210;
   const LEGEND_ROW_H = 19;
@@ -133,7 +141,7 @@ function renderMap(t) {
     ? LEGEND_HEADER_H + legendRows * LEGEND_ROW_H + LEGEND_TOP_GAP
     : LEGEND_HEADER_H + LEGEND_ROW_H + LEGEND_TOP_GAP;
 
-  const CSS_HEIGHT = TITLE_H + MAP_H + legendH + FOOTER_H;
+  const CSS_HEIGHT = TITLE_H + BANNER_H + MAP_H + legendH + FOOTER_H;
 
   canvas.width = CSS_WIDTH * dpr;
   canvas.height = CSS_HEIGHT * dpr;
@@ -156,17 +164,32 @@ function renderMap(t) {
   ctx.fillText(`${t.tambon_en}, ${t.amphoe_en}, ${t.province_en}  |  รหัสพื้นที่ ${t.pcode}`, PAD, PAD + 30);
   ctx.fillText('แผนที่ขอบเขตตำบลและรายชื่อหมู่บ้าน (จัดทำเพื่อการศึกษา)', PAD, PAD + 50);
 
+  // ---- warning banner (only when Voronoi overlay is shown) ----
+  if (showVoronoi) {
+    ctx.fillStyle = '#fff3cd';
+    ctx.fillRect(PAD, TITLE_H, CSS_WIDTH - PAD * 2, BANNER_H - 8);
+    ctx.strokeStyle = '#eddca6';
+    ctx.strokeRect(PAD, TITLE_H, CSS_WIDTH - PAD * 2, BANNER_H - 8);
+    ctx.fillStyle = '#6b5a1a';
+    ctx.font = '700 11px Sarabun, sans-serif';
+    ctx.fillText(
+      '⚠ เส้นประคำนวณโดยประมาณ (Voronoi) จากพิกัดหมู่บ้านเท่านั้น ไม่ใช่ขอบเขตปกครองที่เป็นทางการ',
+      PAD + 10, TITLE_H + 12
+    );
+  }
+
   // ---- map area ----
-  const mapRect = { x: PAD, y: TITLE_H, w: CSS_WIDTH - PAD * 2, h: MAP_H - 10 };
+  const mapRect = { x: PAD, y: TITLE_H + BANNER_H, w: CSS_WIDTH - PAD * 2, h: MAP_H - 10 };
   ctx.strokeStyle = '#e2e0d8';
   ctx.strokeRect(mapRect.x, mapRect.y, mapRect.w, mapRect.h);
 
   const bounds = computeBounds(t.rings, t.bbox);
   drawRings(t.rings, bounds, mapRect);
+  if (showVoronoi) drawVoronoiOverlay(t.rings, villages, bounds, mapRect);
   drawVillages(villages, bounds, mapRect);
 
   // ---- legend ----
-  const legendY = TITLE_H + MAP_H;
+  const legendY = TITLE_H + BANNER_H + MAP_H;
   ctx.fillStyle = '#1f4d36';
   ctx.font = '700 15px Sarabun, sans-serif';
   ctx.fillText('รายชื่อหมู่บ้าน', PAD, legendY);
@@ -250,6 +273,84 @@ function drawRings(rings, bounds, mapRect) {
   ctx.strokeStyle = '#2f6f4f';
   ctx.stroke();
   ctx.restore();
+}
+
+// Approximate per-village "territory" lines using a rasterized nearest-
+// neighbor (Voronoi) tessellation, clipped to the tambon polygon. This is a
+// mathematical approximation from village coordinates only, NOT an official
+// administrative boundary (see the on-page/in-image disclaimer).
+function drawVoronoiOverlay(rings, villages, bounds, mapRect) {
+  const STEP = 3; // CSS px grid resolution
+  const projectedRings = rings.map(ring => ring.map(([lon, lat]) => project(lon, lat, bounds, mapRect)));
+  const points = villages.map(v => project(v.lon, v.lat, bounds, mapRect));
+
+  const cols = Math.ceil(mapRect.w / STEP) + 1;
+  const rows = Math.ceil(mapRect.h / STEP) + 1;
+  const labels = new Int32Array(cols * rows).fill(-1);
+
+  for (let r = 0; r < rows; r++) {
+    const y = mapRect.y + r * STEP;
+    for (let c = 0; c < cols; c++) {
+      const x = mapRect.x + c * STEP;
+      if (!pointInRings(x, y, projectedRings)) continue;
+      labels[r * cols + c] = nearestPointIndex(x, y, points);
+    }
+  }
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(90, 74, 26, 0.55)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 2]);
+  ctx.beginPath();
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const label = labels[r * cols + c];
+      if (label < 0) continue;
+      const x = mapRect.x + c * STEP;
+      const y = mapRect.y + r * STEP;
+      if (c + 1 < cols) {
+        const rightLabel = labels[r * cols + c + 1];
+        if (rightLabel >= 0 && rightLabel !== label) {
+          ctx.moveTo(x + STEP, y);
+          ctx.lineTo(x + STEP, y + STEP);
+        }
+      }
+      if (r + 1 < rows) {
+        const downLabel = labels[(r + 1) * cols + c];
+        if (downLabel >= 0 && downLabel !== label) {
+          ctx.moveTo(x, y + STEP);
+          ctx.lineTo(x + STEP, y + STEP);
+        }
+      }
+    }
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function pointInRings(x, y, projectedRings) {
+  let inside = false;
+  for (const ring of projectedRings) {
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i];
+      const [xj, yj] = ring[j];
+      const intersects = ((yi > y) !== (yj > y)) &&
+        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersects) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function nearestPointIndex(x, y, points) {
+  let best = -1, bestD = Infinity;
+  for (let i = 0; i < points.length; i++) {
+    const dx = points[i][0] - x, dy = points[i][1] - y;
+    const d = dx * dx + dy * dy;
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
 }
 
 function drawVillages(villages, bounds, mapRect) {

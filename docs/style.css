@@ -93,6 +93,34 @@ select:disabled {
   margin-top: 1.5rem;
 }
 
+.voronoi-toggle {
+  background: #fff8e6;
+  border: 1px solid #eddca6;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.voronoi-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.voronoi-toggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+}
+
+.voronoi-note {
+  margin: 0.5rem 0 0 1.6rem;
+  color: #6b5a1a;
+  font-size: 0.85rem;
+}
+
 .canvas-wrap {
   background: var(--panel);
   border: 1px solid var(--border);
